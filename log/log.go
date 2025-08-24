@@ -63,7 +63,8 @@ func Recover(msg string, fields ...zap.Field) {
 
 	err := recover()
 	if err != nil {
-		zaploger.Fatal(msg, zap.Any("recover", err), zap.Any("debug.Stack", string(debug.Stack())), fields ...)
+		fields = append(fields, zap.Any("recover", err), zap.Any("debug.Stack", string(debug.Stack())))
+		zaploger.Fatal(msg, fields...)
 	}
 }
 
@@ -74,6 +75,7 @@ func DRecover(msg string, fields ...zap.Field) {
 	}
 	err := recover()
 	if err != nil {
-		zaploger.DPanic(msg, zap.Any("recover", err), zap.Any("debug.Stack", string(debug.Stack())), fields ...)
+		fields = append(fields, zap.Any("recover", err), zap.Any("debug.Stack", string(debug.Stack())))
+		zaploger.DPanic(msg, fields...)
 	}
 }

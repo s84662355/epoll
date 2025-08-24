@@ -11,6 +11,7 @@ import (
 	"proxy_server/config"
 	"proxy_server/log"
 )
+
 ///events_mask = unix.EPOLLIN | unix.EPOLLOUT | unix.EPOLLHUP | unix.EPOLLERR
 
 func (m *manager) initTcpListener() {
@@ -69,7 +70,17 @@ func (m *manager) tcpListenerAccept(ctx context.Context, tcpListener net.Listene
 
 			go func() {
 				defer close(done)
-				m.handlerTcpConn(ctx, conn)
+				conf := config.GetConf()
+
+				if conf.ProxyType == "http" {
+					m.handlerTcpConn(ctx, conn)
+				} else if conf.ProxyType == "oks" {
+					m.tcpOksHandler(ctx, conn)
+				} else if conf.ProxyType == "bss" {
+					m.tcpBssHandler(ctx, conn)
+				} else {
+					m.handlerTcpConn(ctx, conn)
+				}
 			}()
 
 			select {

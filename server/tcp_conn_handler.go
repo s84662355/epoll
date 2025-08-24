@@ -22,24 +22,18 @@ func (m *manager) handlerTcpConn(ctx context.Context, conn net.Conn) {
 		return
 	}
 
-	// socks5
-	if n <= 8 {
-		m.bytePool.Put(buffer)
-		m.socksTcpConn(ctx, conn)
-		return
-	} else { // http
-		bufferReader := bytes.NewBuffer(buffer[:n])
-		reader := bufio.NewReader(bufferReader)
-		req, err := http.ReadRequest(reader)
-		m.bytePool.Put(buffer)
-		if err != nil {
-			log.Error("[tcp_conn_handler] http代理协议解析失败", zap.Error(err))
-			return
-		}
-		reader = nil
-		bufferReader = nil
-
-		m.httpTcpConn(ctx, conn, req)
+	// http
+	bufferReader := bytes.NewBuffer(buffer[:n])
+	reader := bufio.NewReader(bufferReader)
+	req, err := http.ReadRequest(reader)
+	m.bytePool.Put(buffer)
+	if err != nil {
+		log.Error("[tcp_conn_handler] http代理协议解析失败", zap.Error(err))
 		return
 	}
+	reader = nil
+	bufferReader = nil
+
+	m.httpTcpConn(ctx, conn, req)
+	return
 }
